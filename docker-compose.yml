@@ -1,0 +1,43 @@
+services:
+  knote:
+#    image: albiert/knote:1.0.0
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: knote
+    image: knote
+    networks:
+      - knote
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/dev
+      - MINIO_ACCESS_KEY=mykey
+      - MINIO_SECRET_KEY=mysecret
+      - MINIO_HOST=minio
+    depends_on:
+      - mongo
+    restart: always
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    networks:
+      - knote
+    restart: always
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    networks:
+      - knote
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=mykey
+      - MINIO_SECRET_KEY=mysecret
+    command: server /data
+
+networks:
+  knote:
+    driver: bridge
